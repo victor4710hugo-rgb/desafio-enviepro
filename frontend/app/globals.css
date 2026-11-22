@@ -1,26 +1,101 @@
+
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --background: #0e0b1d;
+  --foreground: #f5f2ff;
+  --purple-deep: #2a1e4d;
+  --purple-main: #5a3b8c;
+  --purple-soft: #8b7cc7;
+  --lavender: #c9c2e3;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--background);
 }
 
 body {
+  min-height: 100vh;
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  ffont-family: var(--font-geist-sans), sans-serif;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app-background {
+  background:
+    radial-gradient(ellipse at 75% 0%, rgba(90, 59, 140, 0.22), transparent 38%),
+    radial-gradient(ellipse at 10% 85%, rgba(76, 48, 125, 0.13), transparent 35%),
+    #0e0b1d;
+}
+
+.glass-sidebar {
+  background: linear-gradient(
+    155deg,
+    rgba(49, 37, 79, 0.78),
+    rgba(25, 19, 44, 0.86) 55%,
+    rgba(20, 16, 36, 0.9)
+  );
+  border: 1px solid rgba(220, 210, 255, 0.13);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 30px rgba(139, 124, 199, 0.035);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+}
+
+.nav-active {
+  border: 1px solid rgba(196, 181, 253, 0.16);
+  background: linear-gradient(
+    100deg,
+    rgba(139, 92, 246, 0.24),
+    rgba(139, 124, 199, 0.10)
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.glass-card {
+  border: 1px solid rgba(220, 210, 255, 0.10);
+  background: linear-gradient(
+    145deg,
+    rgba(54, 42, 83, 0.62),
+    rgba(31, 25, 51, 0.72)
+  );
+  box-shadow:
+    0 16px 45px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+::selection {
+  color: white;
+  background: rgba(139, 92, 246, 0.55);
+}
+
+:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 3px;
 }
