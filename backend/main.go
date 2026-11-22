@@ -4,10 +4,12 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "modernc.org/sqlite"
+	
 )
 
 func main() {
@@ -189,6 +191,125 @@ func main() {
 
 		c.JSON(http.StatusOK, etapas)
 	})
+// Retorna o resumo das vendas do mês atual.
+router.GET("/vendas/resumo", func(c *gin.Context) {
+    agora := time.Now()
+
+    inicioMes := time.Date(
+        agora.Year(),
+        agora.Month(),
+        1,
+        0, 0, 0, 0,
+        agora.Location(),
+    )
+
+    inicioProximoMes := inicioMes.AddDate(0, 1, 0)
+
+    var quantidade int
+    var totalVendido float64
+    var ticketMedio float64
+
+    err := db.QueryRow(`
+        SELECT
+            COUNT(*),
+            COALESCE(SUM(valor), 0),
+            COALESCE(AVG(valor), 0)
+        FROM vendas
+        WHERE date(data) >= date(?)
+          AND date(data) < date(?)
+    `,
+        inicioMes.Format("2006-01-02"),
+        inicioProximoMes.Format("2006-01-02"),
+    ).Scan(
+        &quantidade,
+        &totalVendido,
+        &ticketMedio,
+    )
+
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "erro": "Erro ao consultar o resumo das vendas",
+        })
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "mes_referencia":   inicioMes.Format("2006-01"),
+        "total_vendido":    totalVendido,
+        "quantidade_vendas": quantidade,
+        "ticket_medio":     ticketMedio,
+    })
+})
+
+// Lista todas as vendas com os respectivos clientes.
+router.GET("/vendas", func(c *gin.Context) {
+    linhas, err := db.Query(`
+        SELECT
+            v.id,
+            v.cliente_id,
+            c.nome,
+            v.valor,
+            v.data,
+            v.produto
+        FROM vendas v
+        INNER JOIN clientes c ON c.id = v.cliente_id
+        ORDER BY v.data DESC
+    `)
+
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "erro": "Erro ao consultar as vendas",
+        })
+        return
+    }
+
+    defer linhas.Close()
+
+    vendas := []gin.H{}
+
+    for linhas.Next() {
+        var id int
+        var clienteID int
+        var cliente string
+        var valor float64
+        var data string
+        var produto string
+
+        err := linhas.Scan(
+            &id,
+            &clienteID,
+            &cliente,
+            &valor,
+            &data,
+            &produto,
+        )
+
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{
+                "erro": "Erro ao ler os dados das vendas",
+            })
+            return
+        }
+
+        vendas = append(vendas, gin.H{
+            "id":         id,
+            "cliente_id": clienteID,
+            "cliente":    cliente,
+            "valor":      valor,
+            "data":       data,
+            "produto":    produto,
+        })
+    }
+
+    if err := linhas.Err(); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "erro": "Erro durante a leitura das vendas",
+        })
+        return
+    }
+
+    c.JSON(http.StatusOK, vendas)
+})
 
 	log.Println("Servidor iniciado em http://localhost:8080")
 
