@@ -31,6 +31,10 @@ func main() {
 		log.Fatal("Erro ao criar tabelas:", err)
 	}
 
+	if err := popularBanco(db); err != nil {
+		log.Fatal("Erro ao popular banco:", err)
+	}
+
 	// Configura o servidor Gin.
 	router := gin.Default()
 
