@@ -1,0 +1,20 @@
+# Dependências e arquivos gerados pelo frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Banco de dados local
+backend/*.db
+backend/*.db-shm
+backend/*.db-wal
+
+# Executáveis compilados
+backend/*.exe
+
+# Arquivos de ambiente
+.env
+.env.*
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
