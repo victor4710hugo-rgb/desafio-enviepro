@@ -4,14 +4,26 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	_ "modernc.org/sqlite"
 )
 
 func main() {
+	// Carrega as variáveis de ambiente.
+	if err := godotenv.Load("../.env"); err != nil {
+		log.Fatal("Erro ao carregar ../.env:", err)
+	}
+
+	// Verifica se a chave JWT foi configurada.
+	if os.Getenv("JWT_SECRET") == "" {
+		log.Fatal("JWT_SECRET não configurado")
+	}
+
 	// Abre o banco SQLite. Se não existir, será criado.
 	db, err := sql.Open("sqlite", "./crm.db")
 	if err != nil {
@@ -58,6 +70,18 @@ func main() {
 		"Origin", "Content-Type", "Accept", "Authorization",
 	}
 	router.Use(cors.New(config))
+
+	// Rota pública de autenticação.
+	router.POST("/auth/login", loginHandler(db))
+
+	// Protege todas as rotas registradas a partir daqui.
+	router.Use(Auth())
+
+	// Retorna os dados do usuário autenticado.
+	router.GET("/auth/me", authMeHandler())
+
+	// Registra as rotas de gerenciamento de usuários.
+	registrarRotasUsuarios(router, db)
 
 	// Rota inicial para verificar se a API está funcionando.
 	router.GET("/health", func(c *gin.Context) {

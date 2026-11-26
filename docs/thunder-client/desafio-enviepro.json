@@ -1,0 +1,77 @@
+{
+    "clientName": "Thunder Client",
+    "collectionName": "Desafio EnviePro",
+    "collectionId": "d47023c5-897c-4d55-ac7e-ba80b38f260f",
+    "dateExported": "2026-11-26T04:10:26.868Z",
+    "version": "1.4",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "311e259b-d494-439d-928b-c6344c2e0fdd",
+            "colId": "d47023c5-897c-4d55-ac7e-ba80b38f260f",
+            "containerId": "",
+            "name": "http://localhost:8080/auth/login",
+            "url": "http://localhost:8080/auth/login",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2026-11-26T03:52:35.677Z",
+            "modified": "2026-11-26T03:52:35.677Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": [
+                    "{",
+                    "  \"email\": \"reidelas@yahoo.com.br\",",
+                    "  \"senha\": \"meuprugrandao69\"",
+                    "}"
+                ],
+                "form": []
+            }
+        },
+        {
+            "_id": "1fa0caad-5eba-414e-b370-cba53ed93814",
+            "colId": "d47023c5-897c-4d55-ac7e-ba80b38f260f",
+            "containerId": "",
+            "name": "http://localhost:8080/auth/me",
+            "url": "http://localhost:8080/auth/me",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2026-11-26T03:52:47.016Z",
+            "modified": "2026-11-26T03:52:47.016Z",
+            "headers": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token}}"
+            }
+        },
+        {
+            "_id": "b8babb6a-36dd-46b3-aea5-5a83834cbd08",
+            "colId": "d47023c5-897c-4d55-ac7e-ba80b38f260f",
+            "containerId": "",
+            "name": "http://localhost:8080/clientes",
+            "url": "http://localhost:8080/clientes",
+            "method": "GET",
+            "sortNum": 40000,
+            "created": "2026-11-26T03:52:59.478Z",
+            "modified": "2026-11-26T03:52:59.478Z",
+            "headers": []
+        },
+        {
+            "_id": "d2a6e940-bf57-49df-92cb-e8ef1816c01c",
+            "colId": "d47023c5-897c-4d55-ac7e-ba80b38f260f",
+            "containerId": "",
+            "name": "http://localhost:8080/clientes",
+            "url": "http://localhost:8080/clientes",
+            "method": "GET",
+            "sortNum": 50000,
+            "created": "2026-11-26T03:53:05.543Z",
+            "modified": "2026-11-26T03:53:05.543Z",
+            "headers": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token}}"
+            }
+        }
+    ],
+    "ref": "gwuMMY5TWKrzW9G3PNG0_8x3a1xEexghpRGHvQnV7R54hlEZYZmvbfr0PoSCaw8-kCfDXL3YqXN6dEPw585a0Q"
+}
