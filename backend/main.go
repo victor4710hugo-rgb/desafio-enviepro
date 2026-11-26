@@ -32,6 +32,12 @@ func main() {
 		log.Fatal("Erro ao criar tabelas:", err)
 	}
 
+	// Cria o administrador inicial, caso ainda não exista.
+	if err := criarAdminInicial(db); err != nil {
+		log.Fatal("Erro ao criar administrador inicial:", err)
+	}
+
+	// Popula os dados iniciais do CRM.
 	if err := popularBanco(db); err != nil {
 		log.Fatal("Erro ao popular banco:", err)
 	}
@@ -434,6 +440,15 @@ func criarTabelas(db *sql.DB) error {
 			data DATE NOT NULL,
 			produto TEXT NOT NULL,
 			FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+		);`,
+
+		`CREATE TABLE IF NOT EXISTS usuarios (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			nome TEXT NOT NULL,
+			email TEXT NOT NULL UNIQUE,
+			senha_hash TEXT NOT NULL,
+			papel TEXT NOT NULL CHECK (papel IN ('admin', 'vendedor')),
+			criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 		);`,
 	}
 

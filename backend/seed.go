@@ -3,7 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func popularBanco(db *sql.DB) error {
@@ -164,5 +167,69 @@ func popularBanco(db *sql.DB) error {
 	fmt.Println("Seed executado com sucesso!")
 	fmt.Println("20 clientes, 30 oportunidades e 25 vendas inseridos.")
 
+	return nil
+}
+
+// criarAdminInicial cria o primeiro administrador do sistema.
+// A senha é recebida por variável de ambiente e armazenada somente em hash.
+func criarAdminInicial(db *sql.DB) error {
+	var totalAdmins int
+
+	err := db.QueryRow(
+		"SELECT COUNT(*) FROM usuarios WHERE papel = ?",
+		PapelAdmin,
+	).Scan(&totalAdmins)
+	if err != nil {
+		return fmt.Errorf("erro ao verificar administrador inicial: %w", err)
+	}
+
+	if totalAdmins > 0 {
+		fmt.Println("Administrador inicial já existe. Criação ignorada.")
+		return nil
+	}
+
+	email := normalizarEmail(os.Getenv("ADMIN_EMAIL"))
+	senha := os.Getenv("ADMIN_PASSWORD")
+
+	if err := validarEmail(email); err != nil {
+		return fmt.Errorf("ADMIN_EMAIL inválido: %w", err)
+	}
+
+	if err := validarSenha(senha); err != nil {
+		return fmt.Errorf("ADMIN_PASSWORD inválida: %w", err)
+	}
+
+	duplicado, err := emailJaCadastrado(db, email, 0)
+	if err != nil {
+		return err
+	}
+
+	if duplicado {
+		return fmt.Errorf(
+			"não foi possível criar o administrador: o e-mail informado já pertence a outro usuário",
+		)
+	}
+
+	hash, err := bcrypt.GenerateFromPassword(
+		[]byte(senha),
+		bcrypt.DefaultCost,
+	)
+	if err != nil {
+		return fmt.Errorf("erro ao gerar hash da senha do administrador: %w", err)
+	}
+
+	_, err = db.Exec(
+		`INSERT INTO usuarios (nome, email, senha_hash, papel)
+		 VALUES (?, ?, ?, ?)`,
+		"Administrador",
+		email,
+		string(hash),
+		PapelAdmin,
+	)
+	if err != nil {
+		return fmt.Errorf("erro ao criar administrador inicial: %w", err)
+	}
+
+	fmt.Println("Administrador inicial criado com sucesso.")
 	return nil
 }
