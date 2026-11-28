@@ -4,14 +4,23 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	_ "modernc.org/sqlite"
 )
 
 func main() {
+	if err := godotenv.Load("../.env"); err != nil {
+		log.Fatal("Erro ao carregar ../.env:", err)
+	}
+	if os.Getenv("JWT_SECRET") == "" {
+		log.Fatal("JWT_SECRET não configurado")
+	}
+
 	// Abre o banco SQLite. Se não existir, será criado.
 	db, err := sql.Open("sqlite", "./crm.db")
 	if err != nil {
@@ -30,6 +39,10 @@ func main() {
 	// Cria as tabelas do CRM.
 	if err := criarTabelas(db); err != nil {
 		log.Fatal("Erro ao criar tabelas:", err)
+	}
+
+	if err := criarAdminInicial(db); err != nil {
+		log.Fatal("Erro ao criar administrador inicial:", err)
 	}
 
 	if err := popularBanco(db); err != nil {
@@ -52,6 +65,12 @@ func main() {
 		"Origin", "Content-Type", "Accept", "Authorization",
 	}
 	router.Use(cors.New(config))
+
+	router.POST("/auth/login", loginHandler(db))
+	router.Use(Auth(db))
+
+	router.GET("/auth/me", authMeHandler())
+	registrarRotasUsuarios(router, db)
 
 	// Rota inicial para verificar se a API está funcionando.
 	router.GET("/health", func(c *gin.Context) {
@@ -434,6 +453,15 @@ func criarTabelas(db *sql.DB) error {
 			data DATE NOT NULL,
 			produto TEXT NOT NULL,
 			FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+		);`,
+
+		`CREATE TABLE IF NOT EXISTS usuarios (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			nome TEXT NOT NULL,
+			email TEXT NOT NULL UNIQUE,
+			senha_hash TEXT NOT NULL,
+			papel TEXT NOT NULL CHECK (papel IN ('admin', 'vendedor')),
+			criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 		);`,
 	}
 
